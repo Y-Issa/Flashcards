@@ -45,58 +45,64 @@ document.addEventListener("DOMContentLoaded", function () {
   function render() {
     const formHtml = renderForm();
     const flashcardsHtml = renderFlashCards();
-    rootElement.innerHTML = formHtml + flashcardsHtml;
+    const clearButtonHtml = renderClearButton();
+    rootElement.innerHTML = formHtml + flashcardsHtml + clearButtonHtml;
     addEventListeners();
   }
 
   function renderForm() {
     return `
-            <form class="add-form" onsubmit="handleAddFlashCard(event)">
-                <div class="left">
-                    <p>Add your own flashcard! ✌️ </p>
-                    <button>Add</button>
-                </div>
-                <div class="right">
-                    <input
-                        type="text"
-                        placeholder="Question goes here..."
-                        value=""
-                        id="questionInput"
-                    />
-                    <textarea
-                        placeholder="Answer goes here..."
-                        value=""
-                        id="answerInput"
-                    ></textarea>
-                </div>
-            </form>
-        `;
+      <form class="add-form" onsubmit="handleAddFlashCard(event)">
+        <div class="left">
+          <p>Add your own flashcard! ✌️ </p>
+          <button>Add</button>
+        </div>
+        <div class="right">
+          <input
+            type="text"
+            placeholder="Question goes here..."
+            value=""
+            id="questionInput"
+          />
+          <textarea
+            placeholder="Answer goes here..."
+            value=""
+            id="answerInput"
+          ></textarea>
+        </div>
+      </form>
+    `;
   }
 
   function renderFlashCards() {
     return `
-            <div class="flashcards">
-                ${flashcards
-                  .map(
-                    (card) => `
-                            <div
-                                key="${card.id}"
-                                onclick="handleClick(${card.id})"
-                                class="${
-                                  card.id === selectedId ? "selected" : ""
-                                }"
-                            >
-                                <p>${
-                                  card.id === selectedId
-                                    ? card.answer
-                                    : card.question
-                                }</p>
-                            </div>
-                        `
-                  )
-                  .join("")}
-            </div>
-        `;
+      <div class="flashcards">
+        ${flashcards
+          .map(
+            (card) => `
+              <div
+                key="${card.id}"
+                class="flashcard ${card.id === selectedId ? "selected" : ""}"
+                onclick="handleClick(${card.id})"
+              >
+                <p>${card.id === selectedId ? card.answer : card.question}</p>
+                <button onclick="handleDeleteFlashCard(${
+                  card.id
+                })">✖️</button>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
+  function renderClearButton() {
+    return `
+      <div >
+        <button onclick="handleClearAll()" class="clear-button">Clear All</button>
+      </div>
+    `;
   }
 
   function addEventListeners() {
@@ -124,7 +130,20 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   window.handleClick = function (id) {
-    selectedId = id !== selectedId ? id : null;
+    selectedId = selectedId === id ? null : id;
+    render();
+  };
+
+  window.handleDeleteFlashCard = function (id) {
+    flashcards.splice(
+      flashcards.findIndex((card) => card.id === id),
+      1
+    );
+    render();
+  };
+
+  window.handleClearAll = function () {
+    flashcards.length = 0;
     render();
   };
 
